@@ -608,11 +608,7 @@ void showSignInWithEmailDialog({
   required VoidCallback onSignedIn,
   int? maxPasswordLength,
   int? minPasswordLength,
-  Set<SignInPage>? allowedModes = const {
-    SignInPage.createAccount,
-    SignInPage.signIn,
-    SignInPage.forgotPassword,
-  },
+  Set<SignInPage>? allowedModes,
 }) {
   showDialog(
     context: context,
@@ -622,7 +618,12 @@ void showSignInWithEmailDialog({
         onSignedIn: onSignedIn,
         maxPasswordLength: maxPasswordLength ?? _defaultMaxPasswordLength,
         minPasswordLength: minPasswordLength ?? _defaultMinPasswordLength,
-        allowedModes: allowedModes!,
+        allowedModes: allowedModes ??
+            const {
+              SignInPage.createAccount,
+              SignInPage.signIn,
+              SignInPage.forgotPassword,
+            },
       );
     },
   );
