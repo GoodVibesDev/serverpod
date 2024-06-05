@@ -212,7 +212,7 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
             if (widget.allowedModes.containsAll(
                 [SignInPage.forgotPassword, SignInPage.createAccount]))
               const Spacer(),
-            if (widget.allowedModes.contains(SignInPage.forgotPassword))
+            if (widget.allowedModes.contains(SignInPage.createAccount))
               TextButton(
                 onPressed: _enabled
                     ? () {
