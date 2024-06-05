@@ -1,18 +1,10 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:serverpod_auth_client/serverpod_auth_client.dart';
-import 'package:serverpod_auth_email_flutter/src/auth.dart';
+import 'package:serverpod_auth_email_flutter/serverpod_auth_email_flutter.dart';
 
 const _defaultMaxPasswordLength = 128;
 const _defaultMinPasswordLength = 8;
-
-enum SignInPage {
-  createAccount,
-  confirmEmail,
-  signIn,
-  forgotPassword,
-  confirmPasswordReset,
-}
 
 /// A dialog for signing in with email and password.
 class SignInWithEmailDialog extends StatefulWidget {
