@@ -6,7 +6,7 @@ import 'package:serverpod_auth_email_flutter/src/auth.dart';
 const _defaultMaxPasswordLength = 128;
 const _defaultMinPasswordLength = 8;
 
-enum _Page {
+enum SignInPage {
   createAccount,
   confirmEmail,
   signIn,
@@ -28,6 +28,8 @@ class SignInWithEmailDialog extends StatefulWidget {
   /// The minimum length of the password.
   final int minPasswordLength;
 
+  final Set<SignInPage> allowedModes;
+
   /// Creates a new sign in with email dialog.
   const SignInWithEmailDialog({
     super.key,
@@ -35,6 +37,11 @@ class SignInWithEmailDialog extends StatefulWidget {
     required this.onSignedIn,
     this.maxPasswordLength = _defaultMaxPasswordLength,
     this.minPasswordLength = _defaultMinPasswordLength,
+    this.allowedModes = const {
+      SignInPage.createAccount,
+      SignInPage.signIn,
+      SignInPage.forgotPassword,
+    },
   });
 
   @override
@@ -56,7 +63,7 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
 
   late final EmailAuthController _emailAuth;
 
-  _Page _page = _Page.createAccount;
+  SignInPage _page = SignInPage.createAccount;
 
   bool _enabled = true;
   bool _isPasswordObscured = true;
@@ -65,13 +72,15 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
   void initState() {
     super.initState();
     _emailAuth = EmailAuthController(widget.caller);
+
+    _page = widget.allowedModes.first;
   }
 
   @override
   Widget build(BuildContext context) {
     List<Widget> widgets;
 
-    if (_page == _Page.createAccount) {
+    if (_page == SignInPage.createAccount) {
       widgets = [
         TextField(
           enabled: _enabled,
@@ -135,18 +144,19 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
           onPressed: _enabled ? _createAccount : null,
           child: const Text('Create Account'),
         ),
-        TextButton(
-          onPressed: _enabled
-              ? () {
-                  setState(() {
-                    _page = _Page.signIn;
-                  });
-                }
-              : null,
-          child: const Text('I have an account'),
-        ),
+        if (widget.allowedModes.contains(SignInPage.signIn))
+          TextButton(
+            onPressed: _enabled
+                ? () {
+                    setState(() {
+                      _page = SignInPage.signIn;
+                    });
+                  }
+                : null,
+            child: const Text('I have an account'),
+          ),
       ];
-    } else if (_page == _Page.signIn) {
+    } else if (_page == SignInPage.signIn) {
       widgets = [
         TextField(
           enabled: _enabled,
@@ -198,29 +208,33 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _page = _Page.forgotPassword;
-                });
-              },
-              child: const Text('Forgot Pass'),
-            ),
-            const Spacer(),
-            TextButton(
-              onPressed: _enabled
-                  ? () {
-                      setState(() {
-                        _page = _Page.createAccount;
-                      });
-                    }
-                  : null,
-              child: const Text('Create Account'),
-            ),
+            if (widget.allowedModes.contains(SignInPage.forgotPassword))
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _page = SignInPage.forgotPassword;
+                  });
+                },
+                child: const Text('Forgot Pass'),
+              ),
+            if (widget.allowedModes.containsAll(
+                [SignInPage.forgotPassword, SignInPage.createAccount]))
+              const Spacer(),
+            if (widget.allowedModes.contains(SignInPage.forgotPassword))
+              TextButton(
+                onPressed: _enabled
+                    ? () {
+                        setState(() {
+                          _page = SignInPage.createAccount;
+                        });
+                      }
+                    : null,
+                child: const Text('Create Account'),
+              ),
           ],
         ),
       ];
-    } else if (_page == _Page.forgotPassword) {
+    } else if (_page == SignInPage.forgotPassword) {
       widgets = [
         TextField(
           enabled: _enabled,
@@ -248,14 +262,14 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
           onPressed: _enabled
               ? () {
                   setState(() {
-                    _page = _Page.signIn;
+                    _page = SignInPage.signIn;
                   });
                 }
               : null,
           child: const Text('Back'),
         ),
       ];
-    } else if (_page == _Page.confirmEmail) {
+    } else if (_page == SignInPage.confirmEmail) {
       widgets = [
         const Text(
           'Please check your email. We have sent you a code to verify your address.',
@@ -289,14 +303,14 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
           onPressed: _enabled
               ? () {
                   setState(() {
-                    _page = _Page.signIn;
+                    _page = SignInPage.signIn;
                   });
                 }
               : null,
           child: const Text('Back'),
         ),
       ];
-    } else if (_page == _Page.confirmPasswordReset) {
+    } else if (_page == SignInPage.confirmPasswordReset) {
       widgets = [
         const Text(
           'Please check your email. We have sent you a code to verify your account.',
@@ -346,7 +360,7 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
           onPressed: _enabled
               ? () {
                   setState(() {
-                    _page = _Page.signIn;
+                    _page = SignInPage.signIn;
                   });
                 }
               : null,
@@ -416,7 +430,7 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
       _enabled = true;
 
       if (success) {
-        _page = _Page.confirmEmail;
+        _page = SignInPage.confirmEmail;
       } else {
         _emailIssue = 'Email already in use';
       }
@@ -455,7 +469,7 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
     if (result == null) {
       // Something went wrong, start over
       setState(() {
-        _page = _Page.createAccount;
+        _page = SignInPage.createAccount;
         _enabled = true;
       });
       return;
@@ -524,7 +538,7 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
     await _emailAuth.initiatePasswordReset(email);
 
     setState(() {
-      _page = _Page.confirmPasswordReset;
+      _page = SignInPage.confirmPasswordReset;
       _enabled = true;
     });
   }
@@ -563,7 +577,7 @@ class SignInWithEmailDialogState extends State<SignInWithEmailDialog> {
       // Something went wrong, start over
       setState(() {
         _resetTextFields();
-        _page = _Page.signIn;
+        _page = SignInPage.signIn;
         _enabled = true;
       });
       return;
@@ -602,6 +616,11 @@ void showSignInWithEmailDialog({
   required VoidCallback onSignedIn,
   int? maxPasswordLength,
   int? minPasswordLength,
+  Set<SignInPage>? allowedModes = const {
+    SignInPage.createAccount,
+    SignInPage.signIn,
+    SignInPage.forgotPassword,
+  },
 }) {
   showDialog(
     context: context,
@@ -611,6 +630,7 @@ void showSignInWithEmailDialog({
         onSignedIn: onSignedIn,
         maxPasswordLength: maxPasswordLength ?? _defaultMaxPasswordLength,
         minPasswordLength: minPasswordLength ?? _defaultMinPasswordLength,
+        allowedModes: allowedModes!,
       );
     },
   );

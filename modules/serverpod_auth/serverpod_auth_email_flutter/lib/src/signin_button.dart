@@ -29,6 +29,8 @@ class SignInWithEmailButton extends StatefulWidget {
   /// If this value is modified, the server must be updated to match.
   final int? minPasswordLength;
 
+  final Set<SignInPage>? allowedModes;
+
   /// Creates a new Sign in with Email button.
   const SignInWithEmailButton({
     required this.caller,
@@ -38,6 +40,7 @@ class SignInWithEmailButton extends StatefulWidget {
     this.icon,
     this.maxPasswordLength,
     this.minPasswordLength,
+    this.allowedModes,
     super.key,
   });
 
@@ -63,6 +66,7 @@ class SignInWithEmailButtonState extends State<SignInWithEmailButton> {
           caller: widget.caller,
           maxPasswordLength: widget.maxPasswordLength,
           minPasswordLength: widget.minPasswordLength,
+          allowedModes: widget.allowedModes,
           onSignedIn: () {
             if (widget.onSignedIn != null) {
               widget.onSignedIn!();
